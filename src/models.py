@@ -1,6 +1,6 @@
 import os
 import sys
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String,Enum
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy import create_engine
 from eralchemy2 import render_er
@@ -11,34 +11,39 @@ class User(Base):
     __tablename__ = 'user'
     # Here we define columns for the table person
     # Notice that each column is also a normal Python instance attribute.
-    username = Column(String(250), primary_key=True)
-    email = Column(String(250), nullable=False)
-    password = Column(String(250), nullable=False)
-    name = Column(String(250), nullable=False)
+    id=Column(String(250), primary_key=True)
+    username = Column(String(250), nullable=False)
+    firstname = Column(String(250), nullable=False)
     lastname = Column(String(250), nullable=False)
+    email = Column(String(250), nullable=False)
 
 class Followers(Base):
     __tablename__ = 'followers'
     # Here we define columns for the table address.
     # Notice that each column is also a normal Python instance attribute.
-    f_username = Column(String(250), primary_key=True)
-    f_name = Column(String(250), nullable=False)
-    f_lastname = Column(String(250), nullable=False)
+    id=Column(String(250), primary_key=True)
+    user_from_id = Column(String(250),ForeignKey('user.id'), nullable=False)
+    user_to_id = Column(String(250),ForeignKey('user.id'), nullable=False)
+   
+    class Post(Base):
+        __tablename__='post'
+        id=Column(Integer, primary_key=True)
+        user_id=Column(String(450), ForeignKey('user.id'))
 
-    class MyProfile(Base):
-        __tablename__='myprofile'
-        post_id=Column(Integer, primary_key=True)
-        post=Column(String(450), ForeignKey('post.username'))
-        post=relationship(User)
-        comment_id=Column(Integer, primary_key=True)
-        comment=Column(String(450), ForeignKey('comment.username'))
-        comment=relationship(User)
-        stories_id=Column(Integer, primary_key=True)
-        stories=Column(String(450), ForeignKey('stories.username'))
-    class Favorites(Base):
-        best_stories=Column(String(450), ForeignKey('stories.stories_id'))
-        best_post=Column(String(450), ForeignKey('post.post_id'))
-        user=relationship(User)
+class Media(Base):
+   __tablename__='media'
+   id = Column(Integer, primary_key=True)
+   type=Column(Enum("picture","video",name="media_types"))
+   url=Column(String(450))
+   post_id=Column(Integer, ForeignKey('post.id'))
+        
+class Comment(Base):
+    __tablename__='comment'
+    id = Column(Integer, primary_key=True)
+    comment_text=Column(String(450))
+    author_id=Column(Integer, ForeignKey('user.id'))
+    post_id=Column(Integer, ForeignKey('post.id'))
+    
         
 
     def to_dict(self):
